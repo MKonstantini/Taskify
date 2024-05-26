@@ -1,0 +1,208 @@
+_________________________________
+
+
+MY NOTES - LEARNING NEXT JS V.14
+
+_________________________________
+
+
+What is Next JS?
+An Open-source React framework that enables developers to build server-rendered and statically generated web applications.
+Allows for both Server Side Rendering and Static Site Generation.
+
+Built-In Features:
+- Routing: File based routing.
+- API Routes: Create APIs.
+- Rendering: Supports SSR and CSI .
+- Data Fetching: simplified fetching using await in React Components.
+- Styling: Supports CSS Modules (.module.css), Global Styles (styles/globals.css).
+- Optimization: Optimizes images, fonts, scripts.
+
+What is Vercel?
+The Front-End Cloud Platform. Creators of Next JS. 
+Offers a suite of tools to build, deploy, and manage modern web applications.
+Hosts static sites and serverless functions, has a global CDN, is integrated with Git.
+
+Command Line:
+Create Next JS Project: `npx create-next-app@latest`
+
+React Component Types:
+1. Client Component (RCC): 
+    - Created using "use client" at the top of the component's file.
+    - Cannot read or fetch data.
+    - Can handle hooks and user interaction.
+2. Server Component (RSC): 
+    - The default type of components in Next JS. 
+    - Can read and fetch data from a DB. 
+    - Cannot handle hooks or user interaction 
+
+Special files (file name = functionality):
+- page.tsx
+- layout.tsx
+- template.tsx
+- not-found.tsx
+- loading.tsx 
+- error.tsx
+Component Tree:
+<Layout> => <Template> => <Error Boundary fallback={<Error />}> => <Suspense fallback={<Loading />}>
+=> <Error Boundary fallback={<NotFound />}> => <Page/>.
+
+_________________________________
+
+
+Styling:
+Create style.css with: @tailwind base; @tailwind components; @tailwind utilities;
+Import style.css in components that require the styling.
+
+Metadata:
+Define a page's metadata in layouts and/or pages for improved SEO.
+Define statically: export const metadata : Metadata = { title : 'Home' }
+Define dynamically: export const generateMetadata = ({params} : HomeParams) : Metadata => {
+    return { title : params.id }
+}
+
+Layout:
+page.tsx = UI that is unique to a route.
+layout.tsx = UI that is shared between all pages in/under the the layout's directory.
+In layout.tsx:
+- Export const metadata = metadata which will be applied to the layout's children (improves SEO). 
+- Create and exported JSX that will case all child elements.
+- Child elements "children" are the effected pages, and are automatically set as props of layouts.
+Create nested layouts via creating additional layout.tsx files within route folders.
+Important to note when routing between elements with shared layout (children) - the layout does not unmount-remount.
+
+Templates:
+Exactly like layouts, except total unmounting-remounting does occur when routing between its children
+(DOM elements are recreated, state is re-established, effects are re-synchronized).
+Create a template.tsx file within a directory, receive children, export JSX (like in layouts).
+
+Loading:
+Create loading.tsx file, the exported JSX within will be displayed on content loading (specific to route segment).
+All page files within the same directory as the loading.jsx will be subject to its exported JSX whenever loading.
+This feature implements a React suspense boundary for the effected pages.
+Since the layout is above the loading in the Component Tree - the loading page's layout will still be present and responsive!
+
+Error Handling:
+Create error.tsx file, like loading.tsx - the exported JSX will be displayed on error in pages sharing directory with this file.
+Requires component to be set to "use client".
+Here too the layout is above the error element in the Component Tree - the layout will still be present and responsive on page error.
+Since the layout is not under the error, errors in the layout will not be covered. 
+To handle layout erros, place error.tsx in the directory above the layout.
+This feature implements a React error boundary for the effected pages.
+Component can utilize received error props:
+({ error, reset } : { error : Error; reset : () => void }) => {
+    console.log(error.message) (string)
+    onClick={reset} (invoke function to re-render the page - requires page to be set to "use client")
+} 
+
+
+_________________________________
+
+
+Routing:
+URL paths are defined by the files and folders in src/app.
+Important to closely follow the Next JS conventions for creating routes:
+- All routes must be placed inside the app folder.
+- All folders correspond to a path segment in the URL, except for:
+    1. private folders prefixed _ (_stats).
+    2. route group folders in brackets ((auth)).
+    3. layout props folders prefixed @ for parallel routes (@notification).
+- All route files must be named page.tsx (the exported JSX within this file will be displayed).
+- Create nested routes by creating folders inside of folders.
+- Create dynamic routes (/:id) using [id] as folder name.
+- All pages receive route params as intrinsic props - Component({params}) {params.id}.
+- Can catch-all URL segments using folder name [...slug] - Component({params}) {params.slug[0]}.
+- Adv. catch-all that includes parent folder: [[...slug]].
+- 404 Not Found page is created automatically by Next JS.
+- Create 404 Not Found page file in src/app/not-found.tsx (will replace the default Not Found).
+- Use import { notFound } from 'next/navigation' - a function that routes the app to the nearest Not Found page.
+page.tsx in app is the home page (localhost:3000).
+page.tsx in app/about is the about page (localhost:3000/about).
+Parallel Routing - Display of multiple pages within a layout in the same URL: 
+    1. Create folders @something with page.tsx in a directory with layout.tsx (can also push subsequent folders + page in each @something).
+    2. Destructure these @somethings as props in the layout ({children, something1, something2}).
+    3. In the layout, create a returned JSX with the prop pages as variables.
+    4. Create default.tsx files in the layout's directory and in each @somethings to act as a fallback when one @something pushes to the URL (/something/archived) so that the other @somethings will not crash (unmatched URL slots). 
+Intercepting Routing - Display a intercepting page instead of the target page when using <Link href='/route to target'>:
+    1. Create folder (.)*name of target page's folder* (referably in the same directory as the target folder).
+    2. Create a page.tsx within the (.)x folder. This page will be displayed when routing to the target folder.
+    - If the new (.)x folder folder is in the same directory as the target folder use a single dot (.) 
+    - If the target folder is one directory above the intercepting folder use two dots: (..)x
+    - If the target folder is in the app directory use three dots: (...)x 
+
+Navigation:
+! Naigational functionalities require components to be defined as client components. Insert "use client" at the top of the page.
+- Import Link from 'next/link':
+Use the <Link href=''> component (a React extension of the <a> component), imported from 'next/link'.
+Can be used inside of other components: <h1><Link></Link></h1>.
+- Import { usePathname } from 'next/navigation'.
+Get a variable of the current active URL extension: const pathname = usePathname() (== '/about').
+- Import { useRouter } from 'next/navigation'.
+const router = useRouter(), then: 
+    -> router.replace('/') to navigate to '/'.
+    -> router.back()/router.forward().
+    -> router.push(/about) 
+
+Route Handlers:
+Create RESTful endpoints, for handling API requests (no need for a server). 
+Route handlers run server-side, ensuring that sensitive info like private keys remain secure (never shipped to the browser).
+Creating a GET request:
+    1. In app, create folder *route name* (or folder [id] for /:id just like client routing).
+    2. Create file route.ts in the created folder (note: .ts not .tsx). 
+    3. Create CRUD operation function. Examples:
+    - export async function GET() {
+        return Response.json(comments, status: 200)
+    }
+    - export async function GET(_request: Request, { params }:{ params : { id : string }}) { <- prefixing _ means it will not be used
+        const comment = comments.find( (comment) => comment.id === parseInt(params.id) )
+        return Response.json(comment, status: 200)
+    }
+    - export async function POST(request: Request) {
+        try {
+            const userInput = await request.json()
+            if (!userInput.text) {
+                return new Response(JSON.stringify({ error: 'Missing comment text' }), status: 400 )
+            }
+            const newComment = {
+                id: comments.length + 1,
+                text: userInput.text,
+            }
+            comments.push(newComment)
+            return Response.json(newComment, status: 201 );
+        } catch (error) {
+            console.error('Error creating comment:', error);
+            return new Response(JSON.stringify({ error: 'Failed to create comment' }), status: 500 );
+        }
+    }
+    - export async function PATCH(request: Request, {params}:{params:{id:string}}) {
+        const userInput = await request.json()
+        const index = comments.findIndex((comment) => comment.id === parseInt(params.id))
+        comments[index].text = userInput.text
+
+        return Response.json(comments[index], status: 201)
+    }
+    - export async function DELETE(_request: Request, {params}:{params:{id:string}}) {
+        const index = comments.findIndex((comment) => comment.id === parseInt(params.id))
+        const deletedComment = comments[index]
+        comments.splice(index, 1)
+
+        return Response.json(deletedComment, status: 200)
+    }
+    - export async function GET(request: NextRequest) { <- import { type NextRequest } from 'next/server'
+        const searchParams = request.nextUrl.searchParams 
+        // reads query of url: /comments?query=first
+        const query = searchParams.get("query")
+
+        if (!query) {
+            redirect('/comments') <- import { redirect } from 'next/navigation'
+        }
+        const filteredComments = comments.filter((comment) => comment.text.includes(query))
+
+        return Response.json(filteredComments, status: 200)
+    }
+
+    
+    
+    
+ 
+
