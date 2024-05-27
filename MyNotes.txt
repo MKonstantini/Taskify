@@ -25,7 +25,8 @@ Hosts static sites and serverless functions, has a global CDN, is integrated wit
 
 Command Line:
 Create Next JS Project: `npx create-next-app@latest`
-Init ShadCN: `npm shadcn-ui@latest init` (ShadCN = component library + tools for tailwind - inits: /components, /lib/utils.ts, /components.json)
+Init ShadCN: `npx shadcn-ui@latest init` (ShadCN = component library + tools for tailwind - inits: /components, /lib/utils.ts, /components.json)
+Add ShadCN Component: `shadcn-ui@latest add button` (adds code for <Button> in components folder to be changed and imported)
 
 React Component Types:
 1. Client Component (RCC): 
@@ -54,6 +55,18 @@ _________________________________
 Styling:
 Create style.css with: @tailwind base; @tailwind components; @tailwind utilities;
 Import style.css in components that require the styling.
+
+Fonts:
+For created .woff2 font files (locally placed font):
+    1. Add new .woff2 font file into the public folder
+    2. Import localFont from 'next/font/local'
+    3. const *fontVarName* = localFont({src:"*path to created font file*"})
+    4. import { cn } from '@/lib/utils' (ShadCN utils function for merging classes)
+    5. <p className={cn("p-5 text-center", *fontVarName*)}></p>
+For imported fonts (from external libraries):
+    1. Import { Poppins } from 'next/font/google'
+    2. const *fontVarName* = Poppins({subsets: ['latin'], weight: [100, 200, 300]})
+    3. <p className={cn("p-5 text-center", *fontVarName*)}></p>
 
 Metadata:
 Define a page's metadata in layouts and/or pages for improved SEO.
