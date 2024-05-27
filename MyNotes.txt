@@ -25,6 +25,7 @@ Hosts static sites and serverless functions, has a global CDN, is integrated wit
 
 Command Line:
 Create Next JS Project: `npx create-next-app@latest`
+Init ShadCN: `npm shadcn-ui@latest init` (ShadCN = component library + tools for tailwind - inits: /components, /lib/utils.ts, /components.json)
 
 React Component Types:
 1. Client Component (RCC): 
@@ -34,7 +35,7 @@ React Component Types:
 2. Server Component (RSC): 
     - The default type of components in Next JS. 
     - Can read and fetch data from a DB. 
-    - Cannot handle hooks or user interaction 
+    - Cannot handle hooks or user interaction. 
 
 Special files (file name = functionality):
 - page.tsx
