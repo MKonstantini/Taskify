@@ -121,7 +121,8 @@ Important to closely follow the Next JS conventions for creating routes:
     1. private folders prefixed _ (_stats).
     2. route group folders in brackets ((auth)).
     3. layout props folders prefixed @ for parallel routes (@notification).
-- All route files must be named page.tsx (the exported JSX within this file will be displayed).
+    !Note: For the root page - if no pages.tsx are found, Next JS will default to the folders above for a page to display.
+- All route files must be named page.tsx. The exported JSX within this file will be displayed. Use export default for pages/layouts and export for components
 - Create nested routes by creating folders inside of folders.
 - Create dynamic routes (/:id) using [id] as folder name.
 - All pages receive route params as intrinsic props - Component({params}) {params.id}.
@@ -148,11 +149,11 @@ Navigation:
 ! Naigational functionalities require components to be defined as client components. Insert "use client" at the top of the page.
 - Import Link from 'next/link':
 Use the <Link href=''> component (a React extension of the <a> component), imported from 'next/link'.
-Can be used inside of other components: <h1><Link></Link></h1>.
+Can be used inside or within of other components: <h1><Link></Link></h1>.
 - Import { usePathname } from 'next/navigation'.
 Get a variable of the current active URL extension: const pathname = usePathname() (== '/about').
-- Import { useRouter } from 'next/navigation'.
-const router = useRouter(), then: 
+- Import { useRouter } from 'next/navigation' (functional router to be integrated within code).
+const router = useRouter(), then:
     -> router.replace('/') to navigate to '/'.
     -> router.back()/router.forward().
     -> router.push(/about) 
@@ -214,6 +215,18 @@ Creating a GET request:
 
         return Response.json(filteredComments, status: 200)
     }
+
+
+_________________________________
+
+
+Next JS Components: (To be imported from '/next')
+1. Link: 
+    - import Link from "next/link"
+    - <Link href='/'>
+2. Image:
+    - import Image from "next/image"
+    - <Image src='/logo.svg' alt="logo" height={30} width={30}></Image>
 
     
     
