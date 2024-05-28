@@ -157,6 +157,7 @@ const router = useRouter(), then:
     -> router.replace('/') to navigate to '/'.
     -> router.back()/router.forward().
     -> router.push(/about) 
+- Alternatively, use import { redirect } from 'next/navigation' -> function execute: redirect('/api/auth/signin')
 
 Route Handlers:
 Create RESTful endpoints, for handling API requests (no need for a server). 
@@ -215,6 +216,43 @@ Creating a GET request:
 
         return Response.json(filteredComments, status: 200)
     }
+
+
+Next Auth:
+Provides user authentication (register + login) in Next.js applications.
+Works with providers including: Google, GitHub, Facebook, Email/Password, and more.
+Can be used with databases like MySQL or with token-based authentication (JWT) for session management.
+    1. Install: `npm i next-auth`
+    2. Create an OAuth App in GitHub:
+    For "Authorization callback URL" enter http://localhost:3000/api/auth/callback/github
+    3. Copy the Client ID and Client Secret generated for the application to the application's .env file. 
+    !WARNING: Do not publically upload this .env file, it can sabotage both your app and your github account.
+    4. Inside /app, create: /api/auth/[...nextauth]/route.ts
+    5. In the created route, code:
+    import NextAuth from "next-auth";
+    import GithubProvider from "next-auth/providers/github";
+
+    export default NextAuth({
+    // Configure one or more authentication providers
+    providers: [
+        GithubProvider({
+        clientId: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        }),
+    ],
+    // Secret key used for signing and encrypting cookies and JWTs
+    secret: process.env.NEXTAUTH_SECRET,
+    // Check this process by opening: http://localhost:3000/api/auth/providers, http://localhost:3000/api/auth/signin  
+    });
+    6. For pages with login/register features:
+        - import { signIn } from "next-auth/react"
+        - <Button onClick={() => signIn("github")}>Sign in with Github</Button>
+        (if using google authentication provider use signIn("google") after setup)
+    7. For pages with logout features:
+        - import { signOut } from "next-auth/react"
+        - <Button onClick={() => signOut()}>Logout</Button>
+        - Optional: pass an object into the signOut(): 
+        signOut({redirect: "/", callback: () => console.log("Logged Out!")});
 
 
 _________________________________
