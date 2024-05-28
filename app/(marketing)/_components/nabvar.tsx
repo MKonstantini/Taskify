@@ -1,6 +1,25 @@
-import { Logo } from "@/components/logo"
+"use client"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/logo"
 import Link from "next/link"
+
+const AuthBtn = () => {
+    const { data: session } = useSession()
+
+    if (!session?.user) {
+        return (
+            <Button onClick={() => signIn()} size='sm' variant='outline'>
+                Login
+            </Button>
+        )
+    }
+    return (
+        <Button onClick={() => signOut()} size='sm' variant='outline'>
+            Logout
+        </Button>
+    )
+}
 
 export const Navbar = () => {
     return (
@@ -8,13 +27,9 @@ export const Navbar = () => {
             <div className="md:max-w-screen-2xl mx-auto flex items-center w-full justify-between">
                 <Logo />
                 <div className="space-x-4 md:block md:w-auto flex items-center justify-between w-full">
-                    <Button size='sm' variant='outline' asChild>
-                        <Link href='/sign-in'>
-                            Login
-                        </Link>
-                    </Button>
+                    <AuthBtn />
                     <Button size='sm' asChild>
-                        <Link href='/sign-up'>
+                        <Link href='/api/auth/signin'>
                             Get Taskify for free
                         </Link>
                     </Button>

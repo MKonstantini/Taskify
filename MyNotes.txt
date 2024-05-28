@@ -231,7 +231,6 @@ Can be used with databases like MySQL or with token-based authentication (JWT) f
     5. In the created route, code:
     import NextAuth from "next-auth";
     import GithubProvider from "next-auth/providers/github";
-
     export default NextAuth({
     // Configure one or more authentication providers
     providers: [
@@ -244,15 +243,74 @@ Can be used with databases like MySQL or with token-based authentication (JWT) f
     secret: process.env.NEXTAUTH_SECRET,
     // Check this process by opening: http://localhost:3000/api/auth/providers, http://localhost:3000/api/auth/signin  
     });
-    6. For pages with login/register features:
-        - import { signIn } from "next-auth/react"
+    6. In components folder, create: SessionProvider.tsx:
+    "use client"
+    import { SessionProvider } from 'next-auth/react'
+    export default SessionProvider
+    7. Provide the session data to the children in app layout:
+    import SessionProvider from '../components/SessionProvider'
+    import { getServerSession } from 'next-auth'
+    export default async function RootLayout {
+        const session = await getServerSession()
+        return (
+            <html lang="en">
+            <body className={inter.className}>
+                <SessionProvider session={session}>
+                <main>
+                    {children}
+                </main>
+                </SessionProvider>
+            </body>
+            </html>
+        )
+    }
+    !Note async await.
+    8. For pages with login/register/logout features:
+        - import { signIn, signOut } from "next-auth/react"
         - <Button onClick={() => signIn("github")}>Sign in with Github</Button>
         (if using google authentication provider use signIn("google") after setup)
-    7. For pages with logout features:
-        - import { signOut } from "next-auth/react"
         - <Button onClick={() => signOut()}>Logout</Button>
         - Optional: pass an object into the signOut(): 
-        signOut({redirect: "/", callback: () => console.log("Logged Out!")});
+            signOut({redirect: "/", callback: () => console.log("Logged Out!")});
+    9. For pages that require current session data:
+        - import {useSession} from "next-auth/react"
+        - const someTsxPage = () => {
+            const {data: session} = useSession()
+            if (session) {
+                return (
+                    <>
+                        <p>Welcome {session?.user?.name}</p>
+                        <button onClick={() => signOut()}>Sign out</button>
+                    </>
+                )
+            }
+        }
+        - import {getServerSession}
+        - const alternateSomeTsxPage = async () => {
+            const session = await getServerSession()
+            if (session) {
+                return (
+                    <>
+                        <p>Welcome {session?.user?.name}</p>
+                        <button onClick={() => signOut()}>Sign out</button>
+                    </>
+                )
+            }
+        }
+    10. For routes that require user in session (protected for logged in users only):
+        - import {useSession} from "next-auth/react"
+        - import {redirect} from "next/navigation"
+        - const someTsxPage = async () => {
+            const session = await getServerSession()
+            if (!session || !session.user) {
+                redirect("api/auth/signin")
+            }
+            return (
+                <>
+                    <p>Welcome {session.user.name}</p>
+                </>
+            )
+        }
 
 
 _________________________________

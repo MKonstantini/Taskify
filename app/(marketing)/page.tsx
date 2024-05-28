@@ -4,10 +4,9 @@ import { Medal } from 'lucide-react'
 import { Poppins } from 'next/font/google'
 import { cn } from '@/lib/utils'
 
-
 const font1 = Poppins({ subsets: ['latin'], weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'] });
 
-const MarketingPage = () => {
+const MarketingPage = async () => {
     return (
         <div className={cn('flex items-center justify-center flex-col', font1)}>
             <header className='flex items-center justify-center flex-col font-bold mb-5'>
@@ -24,7 +23,7 @@ const MarketingPage = () => {
                 <p className='text-sm md:text-xl text-neutral-400 mt-4 max-w-xs md:max-w-2xl text-center mx-auto'>Collaborate, manage projects, and reach new productivity peaks. From high rises to the home office, the way your team works is uniue - accomplish it all with Taskify.</p>
                 <div className='flex justify-center'>
                     <Button className='mt-6 font-bold w-auto' size="lg" asChild>
-                        <Link href={'/sign-up'}>Get Taskify for free</Link>
+                        <Link href={'/api/auth/signin'}>Get Taskify for free</Link>
                     </Button>
                 </div>
             </section>
