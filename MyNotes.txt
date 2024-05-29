@@ -218,12 +218,16 @@ Creating a GET request:
     }
 
 
+_________________________________
+
+CLIENT TO DB WORKFLOW [ OAuth -> Next Auth -> Prisma -> PostreSQL ]:
+
 Next Auth:
-Provides user authentication (register + login) in Next.js applications.
-Works with providers including: Google, GitHub, Facebook, Email/Password, and more.
+Provides user authentication to store user information in the client-side session (session scoped).
+Works with providers to receive user info, including: Google, GitHub, Facebook, Email/Password, and more.
 Can be used with databases like MySQL or with token-based authentication (JWT) for session management.
     1. Install: `npm i next-auth`
-    2. Create an OAuth App in GitHub:
+    2. Create an OAuth App in GitHub (allowing next auth to access the logged in account's github info):
     For "Authorization callback URL" enter http://localhost:3000/api/auth/callback/github
     3. Copy the Client ID and Client Secret generated for the application to the application's .env file. 
     !WARNING: Do not publically upload this .env file, it can sabotage both your app and your github account.
@@ -312,6 +316,123 @@ Can be used with databases like MySQL or with token-based authentication (JWT) f
             )
         }
 
+
+Prisma:
+An ORM - Object Relational Mapping tool. Interacts with databases in a clean and straightforward way. No SQL required.
+Uses modals. Requires creating the database schema: includes defining tables, fields, data types and relations.
+Can automatically generates code based on your database.
+RUN MIGRATION = executable task that looks at created models and creates tables in the db.
+PARTS:
+    1. Prisma Client: Auto-generated and type-safe query builder.
+    2. Prisma Migrate: Declarative data modeling and migration system.
+    3. Prisma Studio: GUI (Browser) to view and edit data.
+SETUP:
+    1. Run `npm install prisma`.
+    2. Run `npx prisma init --datasource-provider postresql`:
+        - Creates 'prisma' directory.
+        - Generates a 'schema.prisma' file inside 'prisma' (contains data model and datasource config).
+        - Sets up a basic config with ProstreSQL as the datasource.
+    3. Fill in the database schema: In 'schema.prisma' update the url in the 'datasource' with your PostreSQL connection string. Example:
+        datasource db {
+            provider = "postgresql"
+            url      = env("DATABASE_URL") <- Create this field in .env file
+        }
+        generator client {
+            provider = "prisma-client-js"
+        }
+        model User {
+            id    Int     @id @default(autoincrement())
+            name  String
+            email String  @unique
+        }
+    4. Generate Prisma Client for interacting with the database using typescript: Run `npx prisma generate`.
+    5. Run Migrations for creating the corresponding tables (as defined in schema.prisma) in the database: Run `npx prisma migrate dev --name init`
+
+
+PostgreSQL:
+A powerful, open-source relational database management system. Used for web and business applications.
+Difference between Postres and MySQL:
+- Postres has easier, more liberal licensing (more free).
+- Postres has more reliable transaction management (ACID Complience).
+- Postres can handle more advanced SQL features and extensions.
+- Postres is better at handling large databases.
+- MySQL is simpler, faster and more reliable for read-heavy (CRUD) applications.
+- MySQL is easier to learn, the go-to for simple projects.
+
+
+Supabase:
+Open-source backend-as-a-service (BaaS) platform.
+Provides: managing tools for PostreSQL databases, user management and access-control, real-time update support, file storage for images, videos and documents, auto-generated RESTful API, admin dashboard for the database, authentication, storage and API.
+1. Set up authentication with Supabase and Prisma:
+In prisma/schema.prisma:
+    model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String
+    name      String?
+    }
+2. Use Supabase Auth for login and sign-up processes. Once authenticated, use Prisma to handle user data:
+    import { createClient } from '@supabase/supabase-js'
+    import { PrismaClient } from '@prisma/client'
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    const prisma = new PrismaClient()
+    async function signUp(email, password) {
+    const { user, error } = await supabase.auth.signUp({ email, password })
+    if (error) throw error
+    // Create user in PostgreSQL using Prisma
+    return await prisma.user.create({
+        data: { email, password },
+    });
+    }
+    async function signIn(email, password) {
+    const { user, error } = await supabase.auth.signIn({ email, password })
+    if (error) throw error
+    // Fetch user data using Prisma
+    return await prisma.user.findUnique({
+        where: { email },
+    });
+    }
+3. Handle real-time data sync: Subscribe to table changes + Perform the CRUD operations and rely on Supabase for real-time updates:
+    import { createClient } from '@supabase/supabase-js';
+    import { PrismaClient } from '@prisma/client';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const prisma = new PrismaClient();
+
+    supabase
+    .from('posts')
+    .on('INSERT', payload => {
+        console.log('New post!', payload);
+    })
+    .subscribe();
+
+    async function createPost(title, content) {
+    return await prisma.post.create({
+        data: { title, content },
+    });
+    }
+4. Upload files + store file references in the database:
+    import { createClient } from '@supabase/supabase-js';
+    import { PrismaClient } from '@prisma/client';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const prisma = new PrismaClient();
+
+    async function uploadFile(file) {
+    const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(`public/${file.name}`, file);
+
+    if (error) throw error;
+
+    // Save file reference in PostgreSQL
+    return await prisma.file.create({
+        data: {
+        name: file.name,
+        url: data.Key,
+        },
+    });
+    }
 
 _________________________________
 
