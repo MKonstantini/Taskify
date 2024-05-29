@@ -323,12 +323,12 @@ Uses modals. Requires creating the database schema: includes defining tables, fi
 Can automatically generates code based on your database.
 RUN MIGRATION = executable task that looks at created models and creates tables in the db.
 PARTS:
-    1. Prisma Client: Auto-generated and type-safe query builder.
-    2. Prisma Migrate: Declarative data modeling and migration system.
-    3. Prisma Studio: GUI (Browser) to view and edit data.
+    1. Client: auto generated and type safe query builder.
+    2. Migrate: data modeling and migration system (syncs data).
+    3. Studio: GUI (browser) to view and edit data.
 SETUP:
     1. Run `npm install prisma`.
-    2. Run `npx prisma init --datasource-provider postresql`:
+    2. Run `npx prisma init`:
         - Creates 'prisma' directory.
         - Generates a 'schema.prisma' file inside 'prisma' (contains data model and datasource config).
         - Sets up a basic config with ProstreSQL as the datasource.
@@ -346,7 +346,8 @@ SETUP:
             email String  @unique
         }
     4. Generate Prisma Client for interacting with the database using typescript: Run `npx prisma generate`.
-    5. Run Migrations for creating the corresponding tables (as defined in schema.prisma) in the database: Run `npx prisma migrate dev --name init`
+    5. Run Migrations for creating the corresponding tables (as defined in schema.prisma) in the database: Run `npx prisma migrate`
+    !Warning: Due to "row level security" migration from vscode is f*cked. Create tables directly in SupaBase then run `npx prisma db pull` for creating/editing tables.
 
 
 PostgreSQL:
@@ -371,7 +372,7 @@ In prisma/schema.prisma:
     password  String
     name      String?
     }
-2. Use Supabase Auth for login and sign-up processes. Once authenticated, use Prisma to handle user data:
+2. Optional: Use Supabase Auth for login and sign-up processes. Once authenticated, use Prisma to handle user data:
     import { createClient } from '@supabase/supabase-js'
     import { PrismaClient } from '@prisma/client'
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -392,7 +393,7 @@ In prisma/schema.prisma:
         where: { email },
     });
     }
-3. Handle real-time data sync: Subscribe to table changes + Perform the CRUD operations and rely on Supabase for real-time updates:
+3.  Optional: Handle real-time data sync: Subscribe to table changes + Perform the CRUD operations and rely on Supabase for real-time   updates:
     import { createClient } from '@supabase/supabase-js';
     import { PrismaClient } from '@prisma/client';
 
@@ -411,7 +412,7 @@ In prisma/schema.prisma:
         data: { title, content },
     });
     }
-4. Upload files + store file references in the database:
+4.  Optional: Upload files + store file references in the database:
     import { createClient } from '@supabase/supabase-js';
     import { PrismaClient } from '@prisma/client';
 
@@ -444,9 +445,3 @@ Next JS Components: (To be imported from '/next')
 2. Image:
     - import Image from "next/image"
     - <Image src='/logo.svg' alt="logo" height={30} width={30}></Image>
-
-    
-    
-    
- 
-
