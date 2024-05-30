@@ -332,7 +332,7 @@ SETUP:
         - Creates 'prisma' directory.
         - Generates a 'schema.prisma' file inside 'prisma' (contains data model and datasource config).
         - Sets up a basic config with ProstreSQL as the datasource.
-    3. Fill in the database schema: In 'schema.prisma' update the url in the 'datasource' with your PostreSQL connection string. Example:
+    3. Set up the created 'schemat.prisma': update the url in the 'datasource' with your PostreSQL connection string. Example:
         datasource db {
             provider = "postgresql"
             url      = env("DATABASE_URL") <- Create this field in .env file
@@ -340,14 +340,44 @@ SETUP:
         generator client {
             provider = "prisma-client-js"
         }
-        model User {
+        model User { <- start creating models for the database
             id    Int     @id @default(autoincrement())
             name  String
             email String  @unique
         }
-    4. Generate Prisma Client for interacting with the database using typescript: Run `npx prisma generate`.
-    5. Run Migrations for creating the corresponding tables (as defined in schema.prisma) in the database: Run `npx prisma migrate`
-    !Warning: Due to "row level security" migration from vscode is f*cked. Create tables directly in SupaBase then run `npx prisma db pull` for creating/editing tables.
+    4. Create your tables/schemas. options:
+        - Create schemas in 'schema.prisma'; then run `npx prisma migrate`.
+        - Create tables in Supabase; then run `npx prisma db pull`. 
+    5. Run `npx prisma migrate dev --name init` for creating a migration in migrations folder under the prisma folder.
+    6. Run `npx prisma generate` to ready the Prisma Client in node_modules for interacting with the database, then:
+        import {PrismaClient} from '@prisma/client'
+        const prisma = new PrismaClient()
+        async function main() {
+            //Get All
+            const users = await.prisma.user.findMany()
+
+            //Create User
+            const user = await prisma.user.create({
+                data: {
+                    name: 'Matan',
+                    email: 'somemail@gmail.com'
+                    author: { <- enter relations data
+                        connect : {
+                            id: 1
+                        }
+                    }
+                }
+            })
+        }
+        main()
+            .then(async () => {
+                await prisma.$disconnect()
+            })
+            .catch(async (e) => {
+                console.error(e)
+                await prisma.$disconnect()
+                process.exit(1)
+            })
 
 
 PostgreSQL:

@@ -6,6 +6,7 @@ import Link from "next/link"
 
 const AuthBtn = () => {
     const { data: session } = useSession()
+    console.log(session?.user)
 
     if (!session?.user) {
         return (

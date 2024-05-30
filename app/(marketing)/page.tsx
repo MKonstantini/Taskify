@@ -4,9 +4,10 @@ import { Medal } from 'lucide-react'
 import { Poppins } from 'next/font/google'
 import { cn } from '@/lib/utils'
 
+// font + cn practice
 const font1 = Poppins({ subsets: ['latin'], weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'] });
 
-const MarketingPage = async () => {
+const MarketingPage = () => {
     return (
         <div className={cn('flex items-center justify-center flex-col', font1)}>
             <header className='flex items-center justify-center flex-col font-bold mb-5'>
