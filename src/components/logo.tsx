@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 // fonts and cn practice
-import { cn } from "@/lib/utils"
+import { cn } from "@/src/lib/utils"
 import { Roboto } from 'next/font/google'
 const roboto = Roboto({
     weight: '400',

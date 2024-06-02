@@ -12,21 +12,79 @@ model User {
   created_at         DateTime             @default(now()) @db.Timestamptz(6)
   username           String?              @db.VarChar
   avatar_url         String?              @db.VarChar
+  Activity           Activity[]
   OrganizationToUser OrganizationToUser[]
+  Subscription       Subscription[]
 }
 
 model Organization {
   id                 BigInt               @id @unique @default(autoincrement())
   created_at         DateTime             @default(now()) @db.Timestamptz(6)
   name               String?              @db.VarChar
+  img_url            String?              @db.VarChar
+  Activity           Activity[]
+  Board              Board[]
   OrganizationToUser OrganizationToUser[]
+  Subscription       Subscription[]
 }
 
 model OrganizationToUser {
-  organization_id BigInt
   user_id         BigInt
+  organization_id BigInt
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
   Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([organization_id, user_id])
+  @@id([user_id, organization_id])
+}
+
+model Activity {
+  id              BigInt       @id @unique @default(autoincrement())
+  organization_id BigInt
+  user_id         BigInt
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  detail          String?      @db.VarChar
+  card_id         BigInt?
+  Card            Card?        @relation(fields: [card_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Board {
+  id              BigInt        @id @unique @default(autoincrement())
+  organization_id BigInt?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  name            String?       @db.VarChar
+  img_url         String?       @db.VarChar
+  Organization    Organization? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Card            Card[]
+}
+
+model Card {
+  id         BigInt     @id @unique @default(autoincrement())
+  board_id   BigInt
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  name       String     @db.VarChar
+  Activity   Activity[]
+  Board      Board      @relation(fields: [board_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Task       Task[]
+}
+
+model Subscription {
+  user_id         BigInt
+  organization_id BigInt
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user_id, organization_id])
+}
+
+model Task {
+  id          BigInt   @id @unique @default(autoincrement())
+  card_id     BigInt
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  name        String?  @db.VarChar
+  description String?  @db.VarChar
+  Card        Card     @relation(fields: [card_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

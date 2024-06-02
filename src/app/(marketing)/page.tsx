@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/src/components/ui/button'
 import { Medal } from 'lucide-react'
 import { Poppins } from 'next/font/google'
-import { cn } from '@/lib/utils'
+import { cn } from '@/src/lib/utils'
 
 // font + cn practice
 const font1 = Poppins({ subsets: ['latin'], weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'] });
