@@ -8,83 +8,99 @@ datasource db {
 }
 
 model User {
-  id                 BigInt               @id @unique @default(autoincrement())
-  created_at         DateTime             @default(now()) @db.Timestamptz(6)
-  username           String?              @db.VarChar
-  avatar_url         String?              @db.VarChar
-  Activity           Activity[]
-  OrganizationToUser OrganizationToUser[]
-  Subscription       Subscription[]
+  id                  String               @id @default(uuid())
+  userName            String?              @db.VarChar
+  avatarUrl           String?              @db.VarChar  
+  Activity            Activity[]
+  OrganizationToUser  OrganizationToUser[]
+  Subscription        Subscription[]
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Organization {
-  id                 BigInt               @id @unique @default(autoincrement())
-  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  id                 String               @id @default(uuid())
   name               String?              @db.VarChar
-  img_url            String?              @db.VarChar
+  imgUrl             String?              @db.VarChar
   Activity           Activity[]
   Board              Board[]
   OrganizationToUser OrganizationToUser[]
   Subscription       Subscription[]
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 }
 
 model OrganizationToUser {
-  user_id         BigInt
-  organization_id BigInt
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
-  Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId         String
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+  User           User         @relation(fields: [userId], references: [id])
 
-  @@id([user_id, organization_id])
+  @@id([userId, organizationId])
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Activity {
-  id              BigInt       @id @unique @default(autoincrement())
-  organization_id BigInt
-  user_id         BigInt
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  id              String       @id @default(uuid())
+  organizationId  String
+  userId          String
   detail          String?      @db.VarChar
-  card_id         BigInt?
-  Card            Card?        @relation(fields: [card_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cardId          String?
+  Card            Card?        @relation(fields: [cardId], references: [id])
+  Organization    Organization @relation(fields: [organizationId], references: [id])
+  User            User         @relation(fields: [userId], references: [id])
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Board {
-  id              BigInt        @id @unique @default(autoincrement())
-  organization_id BigInt?
-  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  id              String        @id @default(uuid())
+  organizationId  String?
   name            String?       @db.VarChar
-  img_url         String?       @db.VarChar
-  Organization    Organization? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  imgUrl          String?        @db.VarChar
+  Organization    Organization? @relation(fields: [organizationId], references: [id])
   Card            Card[]
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Card {
-  id         BigInt     @id @unique @default(autoincrement())
-  board_id   BigInt
-  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  id         String     @id @default(uuid())
+  boardId    String
   name       String     @db.VarChar
   Activity   Activity[]
-  Board      Board      @relation(fields: [board_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Board      Board      @relation(fields: [boardId], references: [id])
   Task       Task[]
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Subscription {
-  user_id         BigInt
-  organization_id BigInt
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
-  Organization    Organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User            User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId          String
+  organizationId  String
+  Organization    Organization @relation(fields: [organizationId], references: [id])
+  User            User         @relation(fields: [userId], references: [id])
 
-  @@id([user_id, organization_id])
+  @@id([userId, organizationId])
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Task {
-  id          BigInt   @id @unique @default(autoincrement())
-  card_id     BigInt
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  id          String   @id @default(uuid())
+  cardId      String
   name        String?  @db.VarChar
   description String?  @db.VarChar
-  Card        Card     @relation(fields: [card_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Card        Card     @relation(fields: [cardId], references: [id])
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }

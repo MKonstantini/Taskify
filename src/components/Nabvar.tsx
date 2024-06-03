@@ -1,7 +1,7 @@
 "use client"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/src/components/ui/button"
-import { Logo } from "@/src/components/logo"
+import { Logo } from "./Logo"
 import Link from "next/link"
 
 const AuthBtn = () => {
